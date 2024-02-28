@@ -129,6 +129,16 @@ create_bidirectional_bridge(
     ros2_node->get_logger(), "create bidirectional bridge for topic %s",
     topic_name.c_str());
   BridgeHandles handles;
+
+  // BugFix: Use hardcoded QoS (keep all, transient local) for /tf_static
+  auto ros2_publisher_qos = rclcpp::QoS(rclcpp::KeepLast(queue_size));
+  if (topic_name == "/tf_static") {
+    RCLCPP_INFO(ros2_node->get_logger(), "Setting QoS to keep_all msgs for topic /tf_static.");
+    ros2_publisher_qos.keep_all();
+    ros2_publisher_qos.transient_local();
+  }
+  // end BugFix
+
   handles.bridge1to2 = create_bridge_from_1_to_2(
     ros1_node, ros2_node,
     ros1_type_name, topic_name, queue_size, ros2_type_name, topic_name, queue_size);
